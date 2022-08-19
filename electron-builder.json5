@@ -1,0 +1,50 @@
+/**
+ * @see https://www.electron.build/configuration/configuration
+ */
+{
+  "appId": "com.zephon.app",
+  "asar": true,
+  "directories": {
+    "output": "release/${version}"
+  },
+  "files": [
+    "dist"
+  ],
+/*  "mac": {
+    "artifactName": "${productName}_${version}.${ext}",
+    "target": [
+      "dmg"
+    ]
+  },
+*/
+  "win": {
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "Zephon-H",
+        "repo": "ScoopManager",
+        "token": "github_token"
+      }
+    ],
+    "target": [
+      {
+        "target": "nsis",
+        "arch": [
+            "x64",
+            "ia32"
+        ]
+      },
+      {
+        "target": "zip"
+      }
+    ],
+    "artifactName": "${productName}_${version}.${ext}"
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "deleteAppDataOnUninstall": false
+  },
+   
+}
