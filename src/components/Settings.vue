@@ -81,7 +81,7 @@ const next = () => {
         if (commandMsg.value.length != 0) return;
         selectDir = res.filePaths[0]
         console.log(selectDir)
-        const cmd = `powershell $env: SCOOP = '${selectDir}';[Environment]:: SetEnvironmentVariable('SCOOP', $env: SCOOP, 'User')`
+        const cmd = `powershell "$env:SCOOP = '${selectDir}'; [Environment]:: SetEnvironmentVariable('SCOOP', $env:SCOOP, 'User')"`
         commandMsg.value.push("----------------------------------------------------------------------------------")
         commandMsg.value.push(`正在执行:${cmd} `)
         commandMsg.value.push("----------------------------------------------------------------------------------")
@@ -115,7 +115,7 @@ const next = () => {
           console.log(`子进程退出，退出码 ${code}`);
           commandMsg.value.push("----------------------------------------------------------------------------------")
           commandMsg.value.push("执行完成")
-          if (code == 0) isActive.value = false;
+          isActive.value = false;
           active.value++;
         });
       }
@@ -204,6 +204,27 @@ const next = () => {
 const back = () => {
   commandMsg.value = []
   active.value--;
+  if (active.value == 0) {
+    commandMsg.value = [
+      `使用说明:`,
+      `1. 本程序依赖于scoopt工具，故需要先安装scoop`,
+      `2. 请依次点击下一步安装并配置scoop`,
+      `3. 也可自已执行相关命令，相关命令如下:`,
+      `3.1 查看powershell版本:`,
+      `$PSVersionTable.PSVersion`,
+      `3.2 更改脚本执行策略`,
+      `set-executionpolicy remotesigned -s cu`,
+      `3.3 设置环境变量(scoop安装位置，以D:\Scoop为例)`,
+      `$env:SCOOP='D:\Scoop'`,
+      `[Environment]::SetEnvironmentVariable('SCOOP',$env:SCOOP,'User')`,
+      `3.4 安装Scoop:`,
+      `iex (new-object net.webclient).downloadstring('https://get.scoop.sh')`,
+      `或  iwr-useb get.scoop.sh|iex`,
+      `如有网络问题，可用国内镜像:`,
+      `iwr -useb https://gitee.com/glsnames/scoop-installer/raw/master/bin/install.ps1 | iex`,
+      `scoop config SCOOP_REPO 'https://gitee.com/glsnames/scoop-installer'`
+    ]
+  }
 }
 const scoopDir = ref("");
 const resultMsg = ref<string[]>([])
