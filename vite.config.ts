@@ -41,6 +41,7 @@ export default defineConfig({
       // https://github.com/electron-vite/vite-plugin-electron/tree/main/packages/electron-renderer#electron-renderervite-serve
       renderer: {},
     }),
+    
   ],
   server: {
     host: pkg.env.VITE_DEV_SERVER_HOST,

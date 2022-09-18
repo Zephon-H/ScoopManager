@@ -2,6 +2,7 @@
 import { exec } from 'child_process';
 import { ipcRenderer, shell } from 'electron';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import { last } from 'lodash';
 import { ref } from 'vue';
 import config from "../../package.json"
 // const package = require("../../package.json");
@@ -34,7 +35,7 @@ const next = () => {
   if (active.value == 0) {
     isActive.value = true;
     // Set-ExecutionPolicy RemoteSigned -scope CurrentUser;
-    const ls = spawn('powershell set-executionpolicy remotesigned -s cu', {
+    const ls = spawn('echo "A" | powershell set-executionpolicy remotesigned -s cu', {
       encoding: 'utf8',
       cwd: process.cwd(), // 执行命令路径
       shell: true, // 使用shell命令
@@ -122,9 +123,11 @@ const next = () => {
     })
   } else if (active.value == 2) {
     isActive.value = true;
-    const cmd = "iex (new-object net.webclient).downloadstring('https://get.scoop.sh')"
+    // const condidateCmd = `powershell "iex (new-object net.webclient).downloadstring('https://get.scoop.sh')"`
+    const condidateCmd = `powershell .\\install.ps1`
     // https://github.com/lukesampson/scoop
-    const condidateCmd = `powershell "&iwr -useb https://gitee.com/glsnames/scoop-installer/raw/master/bin/install.ps1 | iex; scoop config SCOOP_REPO "https://gitee.com/glsnames/scoop-installer""`
+
+    // const condidateCmd = `powershell "&iwr -useb https://gitee.com/RubyKids/scoop-cn/raw/master/install.ps1 | iex;"`
     commandMsg.value.push("----------------------------------------------------------------------------------")
     commandMsg.value.push(`正在执行:${condidateCmd}`)
     commandMsg.value.push("----------------------------------------------------------------------------------")
@@ -155,6 +158,34 @@ const next = () => {
     // 子进程关闭事件
     ls.on('close', (code) => {
       console.log(`子进程退出，退出码 ${code}`);
+      console.log(code == 1)
+      if (code != 0) {
+        const newCmd = "powershell .\\install.ps1 -RunAsAdmin"
+        let l = spawn(newCmd, {
+          encoding: 'GBK',
+          cwd: process.cwd(), // 执行命令路径
+          shell: true, // 使用shell命令
+        })
+        // 监听标准输出
+        l.stdout.on('data', (data: any) => {
+          // let s = data
+          let s = data.toString()
+          let ls = s.split("\r\n");
+          ls.forEach((element: string) => {
+            commandMsg.value.push(element);
+          });
+        });
+        // 监听标准错误
+        l.stderr.on('data', (data: any) => {
+          let arr: any[] = []
+          arr.push(data)
+          let s = iconv.decode(Buffer.concat(arr), "GBK")
+          let ls = s.split("\r\n");
+          ls.forEach((element: string) => {
+            commandMsg.value.push(element);
+          });
+        });
+      }
       commandMsg.value.push("执行完成")
       isActive.value = false;
       active.value++;
@@ -289,13 +320,13 @@ const multipleSelectBuckets = ref([])
 const multipleSelectSoftwares = ref([])
 
 const bucketData = [
-  { name: 'main', link: 'https://gitee.com/scoop-bucket/main' },
+  { name: 'main', link: 'https://github.com/ScoopInstaller/Main' },
   { name: 'nirsoft', link: 'https://github.com/kodybrown/scoop-nirsoft' },
-  { name: 'versions', link: 'https://gitee.com/scoop-bucket/versions' },
+  { name: 'versions', link: 'https://github.com/ScoopInstaller/Versions' },
   { name: 'jetbrains', link: 'https://github.com/Ash258/Scoop-JetBrains' },
-  { name: 'extras', link: 'https://gitee.com/scoop-bucket/extras' },
-  { name: 'dorado', link: 'https://gitee.com/scoop-bucket/dorado' },
-  { name: 'ZephonBucket', link: ' https://gitee.com/Zephon-H/ZephonBucket' },
+  { name: 'extras', link: 'https://github.com/ScoopInstaller/Extras' },
+  { name: 'dorado', link: 'https://github.com/h404bi/dorado' },
+  { name: 'java', link: 'https://github.com/ScoopInstaller/Java' },
 ]
 
 const softwareData = [
@@ -305,7 +336,7 @@ const softwareData = [
   { name: 'utools', description: '生产力工具,主要可以快速搜索定位电脑中的文件,并且支持各种插件' },
   { name: 'tabby', description: '生产力工具,一个好用的命令行工具,但会损失一点点性能' },
   { name: 'snipaste', description: '一个好用的截图工具' },
-  { name: 'git', description: '对,就是github的git' },
+  { name: 'git', description: '对,就是github的git,必须安装,否则其它很多功能无法使用' },
 ]
 
 const handleSelectionChange = (val: any) => {

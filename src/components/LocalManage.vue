@@ -85,7 +85,7 @@ const createFilter = (queryString: string) => {
 }
 const handleUninstall = (index: number, name: any) => {
   state.removeLoading[index] = true
-  const cmd = sudo.value + "scoop uninstall " + name
+  const cmd = sudo.value + " scoop uninstall " + name
   const ls = spawn(cmd, {
     encoding: 'utf8',
     cwd: process.cwd(), // 执行命令路径
